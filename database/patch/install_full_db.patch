@@ -1,0 +1,105 @@
+diff --git a/InstallFullDB.sh b/InstallFullDB.sh
+old mode 100755
+new mode 100644
+index 910644a..bc4ce1f
+--- a/InstallFullDB.sh
++++ b/InstallFullDB.sh
+@@ -67,6 +67,7 @@ DEV_UPDATES_DEFAULT="NO"
+ AHBOT_DEFAULT="NO"
+ PLAYERBOTS_DB_DEFAULT="NO"
+ FORCE_WAIT_DEFAULT="YES"
++LOCALIZATION_PATCH_DEFAULT=""
+ 
+ # variables assigned and read from $CONFIG_FILE
+ MYSQL_HOST="${MYSQL_HOST_DEFAULT}"
+@@ -87,6 +88,7 @@ DEV_UPDATES="${DEV_UPDATES_DEFAULT}"
+ PLAYERBOTS_DB="${PLAYERBOTS_DB_DEFAULT}"
+ AHBOT="${AHBOT_DEFAULT}"
+ FORCE_WAIT="${FORCE_WAIT_DEFAULT}"
++LOCALIZATION_PATCH="${LOCALIZATION_PATCH_DEFAULT}"
+ 
+ #possible search folder for core path
+ DEFAULT_CORE_FOLDER="$EXPANSION_LC"
+@@ -204,10 +206,10 @@ function initialize()
+ function set_sql_queries
+ {
+   # create databases
+-  SQL_CREATE_WORLD_DB="CREATE DATABASE \`$WORLD_DB_NAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+-  SQL_CREATE_CHAR_DB="CREATE DATABASE \`$CHAR_DB_NAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+-  SQL_CREATE_REALM_DB="CREATE DATABASE \`$REALM_DB_NAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
+-  SQL_CREATE_LOGS_DB="CREATE DATABASE \`$LOGS_DB_NAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;"
++  SQL_CREATE_WORLD_DB="CREATE DATABASE \`$WORLD_DB_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
++  SQL_CREATE_CHAR_DB="CREATE DATABASE \`$CHAR_DB_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
++  SQL_CREATE_REALM_DB="CREATE DATABASE \`$REALM_DB_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
++  SQL_CREATE_LOGS_DB="CREATE DATABASE \`$LOGS_DB_NAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+ 
+   # create database user and grant privileges
+   SQL_CREATE_DATABASE_USER="CREATE USER IF NOT EXISTS '$MYSQL_USERNAME'@'$MYSQL_USERIP' IDENTIFIED BY '$MYSQL_PASSWORD';"
+@@ -305,6 +307,9 @@ function save_settings()
+   allsettings+=("##   Set the variable to \"YES\" to use the playerbots directory")
+   allsettings+=("PLAYERBOTS_DB=\"$PLAYERBOTS_DB\"")
+   allsettings+=("")
++  allsettings+=("## Define name of localization patch, that located at FULL_DB folder")
++  allsettings+=("LOCALIZATION_PATCH=\"$LOCALIZATION_PATCH\"")
++  allsettings+=("")
+   allsettings+=("# Enjoy using the tool")
+ 
+   # save to file
+@@ -1030,6 +1035,12 @@ function are_you_sure()
+ ## DB work function ###########################
+ ###############################################
+ 
++# Apply charset patch to main file
++function patch_main_file_charsets()
++{
++  sed -i -e 's/CHARSET=utf8mb3/CHARSET=utf8mb4/g' ${ADDITIONAL_PATH}Full_DB/$FULLDB_FILE
++}
++
+ # Apply main file to db
+ function apply_main_file()
+ {
+@@ -1042,6 +1053,18 @@ function apply_main_file()
+   true
+ }
+ 
++# Apply localization patch to db
++function apply_localization_patch()
++{
++  if ! execute_sql_file "$WORLD_DB_NAME" "${ADDITIONAL_PATH}Full_DB/$LOCALIZATION_PATCH" "  - Applying $LOCALIZATION_PATCH"; then
++    false
++    return
++  fi
++  echo
++  echo
++  true
++}
++
+ # retrieve current revision from source file
+ function get_current_source_db_version()
+ {
+@@ -1522,6 +1545,11 @@ function apply_playerbots_db
+ # Content db installation
+ function apply_content_db()
+ {
++  ## Before applying main file (${ADDITIONAL_PATH}Full_DB/$FULLDB_FILE)
++  ## we need to patch it due localization, by changing tables charsets from utf8mb3 to utf8mb4
++  echo "> Patch main ${EXPANSION}-DB release file \"$DB_RELEASE_TITLE\" by changing charsets ... "
++  patch_main_file_charsets
++
+     ## Full Database
+   echo "> Processing main ${EXPANSION}-DB release file \"$DB_RELEASE_TITLE\" ... "
+   if ! apply_main_file; then
+@@ -1529,6 +1557,13 @@ function apply_content_db()
+     return
+   fi
+ 
++  ## Localization patch
++  echo "> Trying to process ${LOCALIZATION_PATCH} patch with locales"
++  if ! apply_localization_patch; then
++    false
++    return
++  fi
++
+   ## Updates
+   echo "> Trying to process ${EXPANSION}-DB updates"
+   local COUNT=0

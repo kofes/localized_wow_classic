@@ -1,0 +1,557 @@
+--- cmangos_ruRU_support.patch	2024-07-10 10:20:59.962364089 +0000
++++ cmangos_ruRU_support.patch	2024-07-10 10:20:11.191093804 +0000
+@@ -1,260 +1,294 @@
+- src/game/Chat/Chat.cpp   |  6 +++---
+- src/game/Chat/Level1.cpp |  4 ++--
+- src/game/Chat/Level2.cpp |  8 ++++----
+- src/game/Chat/Level3.cpp | 16 ++++++++--------
+- src/game/World/World.cpp | 12 ++++++------
+- src/shared/Common.cpp    |  2 ++
+- src/shared/Common.h      |  4 +++-
+- 7 files changed, 28 insertions(+), 24 deletions(-)
+-
+-diff --git a/src/game/Chat/Chat.cpp b/src/game/Chat/Chat.cpp
+-index 34d99f6f0..732fc0991 100644
+---- a/src/game/Chat/Chat.cpp
+-+++ b/src/game/Chat/Chat.cpp
+-@@ -1883,7 +1883,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
+-                                 return false;
+-                             }
+- 
+--                            for (uint8 i = 0; i < MAX_LOCALE; ++i)
+-+                            for (uint8 i = 0; i < MAX_DBC_LOCALE; ++i)
+-                             {
+-                                 uint32 skillLineNameLength = strlen(skillLine->name[i]);
+-                                 if (skillLineNameLength > 0 && strncmp(skillLine->name[i], buffer, skillLineNameLength) == 0)
+-@@ -1896,7 +1896,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
+-                             }
+-                         }
+-                         bool foundName = false;
+--                        for (uint8 i = 0; i < MAX_LOCALE; ++i)
+-+                        for (uint8 i = 0; i < MAX_DBC_LOCALE; ++i)
+-                         {
+-                             if (*linkedSpell->SpellName[i] && strcmp(linkedSpell->SpellName[i], buffer) == 0)
+-                             {
+-@@ -1944,7 +1944,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
+-                             ItemLocale const* il = sObjectMgr.GetItemLocale(linkedItem->ItemId);
+- 
+-                             bool foundName = false;
+--                            for (uint8 i = LOCALE_koKR; i < MAX_LOCALE; ++i)
+-+                            for (uint8 i = LOCALE_koKR; i < MAX_DBC_LOCALE; ++i)
+-                             {
+-                                 int8 dbIndex = sObjectMgr.GetIndexForLocale(LocaleConstant(i));
+-                                 if (dbIndex == -1 || il == nullptr || (size_t)dbIndex >= il->Name.size())
+-diff --git a/src/game/Chat/Level1.cpp b/src/game/Chat/Level1.cpp
+-index be8ea1a35..ad1dbe992 100644
+---- a/src/game/Chat/Level1.cpp
+-+++ b/src/game/Chat/Level1.cpp
+-@@ -1497,7 +1497,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -1511,7 +1511,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 // send area in "id - [name]" format
+-                 std::ostringstream ss;
+-diff --git a/src/game/Chat/Level2.cpp b/src/game/Chat/Level2.cpp
+-index 913816cd6..5869ddd63 100644
+---- a/src/game/Chat/Level2.cpp
+-+++ b/src/game/Chat/Level2.cpp
+-@@ -1408,7 +1408,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -1422,7 +1422,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : nullptr;
+-                 ShowFactionListHelper(factionEntry, LocaleConstant(loc), repState, target);
+-@@ -4147,7 +4147,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
+-         if (!Utf8FitTo(name, wnamepart))
+-         {
+-             loc = 0;
+--            for (; loc < MAX_LOCALE; ++loc)
+-+            for (; loc < MAX_DBC_LOCALE; ++loc)
+-             {
+-                 if (loc == GetSessionDbcLocale())
+-                     continue;
+-@@ -4161,7 +4161,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
+-             }
+-         }
+- 
+--        if (loc < MAX_LOCALE)
+-+        if (loc < MAX_DBC_LOCALE)
+-         {
+-             targetSkillInfo = skillInfo;
+-             break;
+-diff --git a/src/game/Chat/Level3.cpp b/src/game/Chat/Level3.cpp
+-index 19256b3e4..be1250c09 100644
+---- a/src/game/Chat/Level3.cpp
+-+++ b/src/game/Chat/Level3.cpp
+-@@ -2228,7 +2228,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -2242,7 +2242,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 // send item set in "id - [namedlink locale]" format
+-                 if (m_session)
+-@@ -2291,7 +2291,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -2305,7 +2305,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 char valStr[50] = "";
+-                 char const* knownStr = "";
+-@@ -2416,7 +2416,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -2430,7 +2430,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 ShowSpellListHelper(target, spellInfo, LocaleConstant(loc));
+-                 ++counter;
+-@@ -2655,7 +2655,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
+-             if (!Utf8FitTo(name, wnamepart))
+-             {
+-                 loc = 0;
+--                for (; loc < MAX_LOCALE; ++loc)
+-+                for (; loc < MAX_DBC_LOCALE; ++loc)
+-                 {
+-                     if (loc == GetSessionDbcLocale())
+-                         continue;
+-@@ -2669,7 +2669,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
+-                 }
+-             }
+- 
+--            if (loc < MAX_LOCALE)
+-+            if (loc < MAX_DBC_LOCALE)
+-             {
+-                 // send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
+-                 if (m_session)
+-diff --git a/src/game/World/World.cpp b/src/game/World/World.cpp
+-index 22f4efee8..430008faf 100644
+---- a/src/game/World/World.cpp
+-+++ b/src/game/World/World.cpp
+-@@ -1327,9 +1327,9 @@ void World::DetectDBCLang()
+- {
+-     uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
+- 
+--    if (m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
+-+    if (m_lang_confid != 255 && m_lang_confid >= MAX_DBC_LOCALE)
+-     {
+--        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_LOCALE);
+-+        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_DBC_LOCALE);
+-         m_lang_confid = LOCALE_enUS;
+-     }
+- 
+-@@ -1338,8 +1338,8 @@ void World::DetectDBCLang()
+- 
+-     std::string availableLocalsStr;
+- 
+--    uint32 default_locale = MAX_LOCALE;
+--    for (int i = MAX_LOCALE - 1; i >= 0; --i)
+-+    uint32 default_locale = MAX_DBC_LOCALE;
+-+    for (int i = MAX_DBC_LOCALE - 1; i >= 0; --i)
+-     {
+-         if (strlen(race->name[i]) > 0)                      // check by race names
+-         {
+-@@ -1350,13 +1350,13 @@ void World::DetectDBCLang()
+-         }
+-     }
+- 
+--    if (default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
+-+    if (default_locale != m_lang_confid && m_lang_confid < MAX_DBC_LOCALE &&
+-             (m_availableDbcLocaleMask & (1 << m_lang_confid)))
+-     {
+-         default_locale = m_lang_confid;
+-     }
+- 
+--    if (default_locale >= MAX_LOCALE)
+-+    if (default_locale >= MAX_DBC_LOCALE)
+-     {
+-         sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
+-         Log::WaitBeforeContinueIfNeed();
+-diff --git a/src/shared/Common.cpp b/src/shared/Common.cpp
+-index 17b925c52..f8ea2e3fc 100644
+---- a/src/shared/Common.cpp
+-+++ b/src/shared/Common.cpp
+-@@ -28,6 +28,7 @@ char const* localeNames[MAX_LOCALE] =
+-     "zhTW",
+-     "esES",
+-     "esMX",
+-+    "ruRU"
+- };
+- 
+- // used for search by name or iterate all names
+-@@ -42,6 +43,7 @@ LocaleNameStr const fullLocaleNameList[] =
+-     { "zhTW", LOCALE_zhTW },
+-     { "esES", LOCALE_esES },
+-     { "esMX", LOCALE_esMX },
+-+    { "ruRU", LOCALE_ruRU },
+-     { NULL,   LOCALE_enUS }
+- };
+- 
+-diff --git a/src/shared/Common.h b/src/shared/Common.h
+-index 7d2e54f78..429161757 100644
+---- a/src/shared/Common.h
+-+++ b/src/shared/Common.h
+-@@ -146,11 +146,13 @@ enum LocaleConstant : uint8
+-     LOCALE_zhTW = 5,
+-     LOCALE_esES = 6,
+-     LOCALE_esMX = 7,
+-+    LOCALE_ruRU = 8
+- };
+- 
+- #define DEFAULT_LOCALE LOCALE_enUS
+- 
+--#define MAX_LOCALE 8
+-+#define MAX_LOCALE 9
+-+#define MAX_DBC_LOCALE 8
+- 
+- LocaleConstant GetLocaleByName(const std::string& name);
+- 
++diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
++index ddde74c..92a796e 100644
++--- a/src/CMakeLists.txt
+++++ b/src/CMakeLists.txt
++@@ -24,12 +24,14 @@ endif()
++ # Playerbots module
++ if(BUILD_PLAYERBOTS)
++   include(FetchContent)
++-
+++  set(PLAYER_BOTS_PATCH_COMMAND git apply /tmp/playerbots.patch)
++   FetchContent_Declare(
++     PlayerBots
++     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots"
++     GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
++     GIT_TAG "master"
+++    PATCH_COMMAND ${PLAYER_BOTS_PATCH_COMMAND}
+++    UPDATE_DISCONNECTED 1
++   )
++ 
++   FetchContent_GetProperties(PlayerBots)
++diff --git a/src/game/Chat/Chat.cpp b/src/game/Chat/Chat.cpp
++index 9b9f699..dd06579 100644
++--- a/src/game/Chat/Chat.cpp
+++++ b/src/game/Chat/Chat.cpp
++@@ -2033,7 +2033,7 @@ bool ChatHandler::CheckEscapeSequences(const char* message)
++                                 return false;
++                             }
++ 
++-                            for (uint8 i = 0; i < MAX_LOCALE; ++i)
+++                            for (uint8 i = 0; i < MAX_DBC_LOCALE; ++i)
++                             {
++                                 uint32 skillLineNameLength = strlen(skillLine->name[i]);
++                                 if (skillLineNameLength > 0 && strncmp(skillLine->name[i], buffer, skillLineNameLength) == 0)
++@@ -2046,7 +2046,7 @@ bool ChatHandler::CheckEscapeSequences(const char* message)
++                             }
++                         }
++                         bool foundName = false;
++-                        for (uint8 i = 0; i < MAX_LOCALE; ++i)
+++                        for (uint8 i = 0; i < MAX_DBC_LOCALE; ++i)
++                         {
++                             if (*linkedSpell->SpellName[i] && strcmp(linkedSpell->SpellName[i], buffer) == 0)
++                             {
++@@ -2094,7 +2094,7 @@ bool ChatHandler::CheckEscapeSequences(const char* message)
++                             ItemLocale const* il = sObjectMgr.GetItemLocale(linkedItem->ItemId);
++ 
++                             bool foundName = false;
++-                            for (uint8 i = LOCALE_koKR; i < MAX_LOCALE; ++i)
+++                            for (uint8 i = LOCALE_koKR; i < MAX_DBC_LOCALE; ++i)
++                             {
++                                 int8 dbIndex = sObjectMgr.GetStorageLocaleIndexFor(LocaleConstant(i));
++                                 if (dbIndex == -1 || il == nullptr || (size_t)dbIndex >= il->Name.size())
++diff --git a/src/game/Chat/Level1.cpp b/src/game/Chat/Level1.cpp
++index 681e4a0..e3f1216 100644
++--- a/src/game/Chat/Level1.cpp
+++++ b/src/game/Chat/Level1.cpp
++@@ -1288,7 +1288,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -1302,7 +1302,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 // send area in "id - [name]" format
++                 std::ostringstream ss;
++diff --git a/src/game/Chat/Level2.cpp b/src/game/Chat/Level2.cpp
++index d604174..b175582 100644
++--- a/src/game/Chat/Level2.cpp
+++++ b/src/game/Chat/Level2.cpp
++@@ -1474,7 +1474,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -1488,7 +1488,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : nullptr;
++                 ShowFactionListHelper(factionEntry, LocaleConstant(loc), repState, target);
++@@ -4228,7 +4228,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
++         if (!Utf8FitTo(name, wnamepart))
++         {
++             loc = 0;
++-            for (; loc < MAX_LOCALE; ++loc)
+++            for (; loc < MAX_DBC_LOCALE; ++loc)
++             {
++                 if (loc == GetSessionDbcLocale())
++                     continue;
++@@ -4242,7 +4242,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
++             }
++         }
++ 
++-        if (loc < MAX_LOCALE)
+++        if (loc < MAX_DBC_LOCALE)
++         {
++             targetSkillInfo = skillInfo;
++             break;
++diff --git a/src/game/Chat/Level3.cpp b/src/game/Chat/Level3.cpp
++index 45d5f3b..d276a7a 100644
++--- a/src/game/Chat/Level3.cpp
+++++ b/src/game/Chat/Level3.cpp
++@@ -2470,7 +2470,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -2484,7 +2484,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 // send item set in "id - [namedlink locale]" format
++                 if (m_session)
++@@ -2533,7 +2533,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -2547,7 +2547,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 char valStr[50] = "";
++                 char const* knownStr = "";
++@@ -2658,7 +2658,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -2672,7 +2672,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 ShowSpellListHelper(target, spellInfo, LocaleConstant(loc));
++                 ++counter;
++@@ -2897,7 +2897,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
++             if (!Utf8FitTo(name, wnamepart))
++             {
++                 loc = 0;
++-                for (; loc < MAX_LOCALE; ++loc)
+++                for (; loc < MAX_DBC_LOCALE; ++loc)
++                 {
++                     if (loc == GetSessionDbcLocale())
++                         continue;
++@@ -2911,7 +2911,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
++                 }
++             }
++ 
++-            if (loc < MAX_LOCALE)
+++            if (loc < MAX_DBC_LOCALE)
++             {
++                 // send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
++                 if (m_session)
++diff --git a/src/game/Globals/Locales.cpp b/src/game/Globals/Locales.cpp
++index 61e1936..077e98c 100644
++--- a/src/game/Globals/Locales.cpp
+++++ b/src/game/Globals/Locales.cpp
++@@ -9,6 +9,8 @@ char const* localeNames[MAX_LOCALE] =
++     "zhCN",
++     "zhTW",
++     "esES",
+++    "esMX",
+++    "ruRU"
++ };
++ 
++ // used for search by name or iterate all names
++@@ -22,6 +24,8 @@ LocaleNameStr const fullLocaleNameList[] =
++     { "zhCN",   LOCALE_zhCN },
++     { "zhTW",   LOCALE_zhTW },
++     { "esES",   LOCALE_esES },
+++    { "esMX",   LOCALE_esMX },
+++    { "ruRU",   LOCALE_ruRU },
++     { nullptr,  LOCALE_enUS }
++ };
++ 
++diff --git a/src/game/Globals/Locales.h b/src/game/Globals/Locales.h
++index 641ee97..93093f4 100644
++--- a/src/game/Globals/Locales.h
+++++ b/src/game/Globals/Locales.h
++@@ -32,9 +32,12 @@ enum LocaleConstant : uint8
++     LOCALE_zhCN = 4,
++     LOCALE_zhTW = 5,
++     LOCALE_esES = 6,
+++    LOCALE_esMX = 7,
+++    LOCALE_ruRU = 8,
++ };
++ 
++-#define MAX_LOCALE 7
+++#define MAX_LOCALE 9
+++#define MAX_DBC_LOCALE 7
++ #define DEFAULT_LOCALE LOCALE_enUS
++ 
++ LocaleConstant GetLocaleByName(const std::string& name);
++diff --git a/src/game/Server/DBCStores.cpp b/src/game/Server/DBCStores.cpp
++index 0eeeb69..2573a80 100644
++--- a/src/game/Server/DBCStores.cpp
+++++ b/src/game/Server/DBCStores.cpp
++@@ -648,7 +648,7 @@ uint32 GetAreaIdByLocalizedName(const std::string& name)
++     {
++         if (AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i))
++         {
++-            for (uint32 i = 0; i < MAX_LOCALE; ++i)
+++            for (uint32 i = 0; i < MAX_DBC_LOCALE; ++i)
++             {
++                 std::string area_name(AreaEntry->area_name[i]);
++                 if (area_name.size() > 0 && name.find(" - " + area_name) != std::string::npos)
++@@ -750,7 +750,7 @@ ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32
++             // try to match by name first, avoid creating custom channels with same name
++             if (!wname.empty())
++             {
++-                for (uint32 i = 0; i < MAX_LOCALE; ++i)
+++                for (uint32 i = 0; i < MAX_DBC_LOCALE; ++i)
++                 {
++                     Utf8toWStr(entry->pattern[i], wpattern);
++ 
++diff --git a/src/game/World/World.cpp b/src/game/World/World.cpp
++index 463a7a0..e979adc 100644
++--- a/src/game/World/World.cpp
+++++ b/src/game/World/World.cpp
++@@ -1426,9 +1426,9 @@ void World::DetectDBCLang()
++ {
++     uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
++ 
++-    if (m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
+++    if (m_lang_confid != 255 && m_lang_confid >= MAX_DBC_LOCALE)
++     {
++-        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_LOCALE);
+++        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_DBC_LOCALE);
++         m_lang_confid = DEFAULT_LOCALE;
++     }
++ 
++@@ -1437,8 +1437,8 @@ void World::DetectDBCLang()
++ 
++     std::string availableLocalsStr;
++ 
++-    uint32 default_locale = MAX_LOCALE;
++-    for (int i = MAX_LOCALE - 1; i >= 0; --i)
+++    uint32 default_locale = MAX_DBC_LOCALE;
+++    for (int i = MAX_DBC_LOCALE - 1; i >= 0; --i)
++     {
++         if (strlen(race->name[i]) > 0)                      // check by race names
++         {
++@@ -1449,13 +1449,13 @@ void World::DetectDBCLang()
++         }
++     }
++ 
++-    if (default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
+++    if (default_locale != m_lang_confid && m_lang_confid < MAX_DBC_LOCALE &&
++             (m_availableDbcLocaleMask & (1 << m_lang_confid)))
++     {
++         default_locale = m_lang_confid;
++     }
++ 
++-    if (default_locale >= MAX_LOCALE)
+++    if (default_locale >= MAX_DBC_LOCALE)
++     {
++         sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
++         Log::WaitBeforeContinueIfNeed();

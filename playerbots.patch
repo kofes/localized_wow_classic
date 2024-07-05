@@ -1,0 +1,34 @@
+diff --git a/playerbot/PlayerbotMgr.cpp b/playerbot/PlayerbotMgr.cpp
+index 68da7676..ef330765 100644
+--- a/playerbot/PlayerbotMgr.cpp
++++ b/playerbot/PlayerbotMgr.cpp
+@@ -371,8 +371,10 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
+     // join standard channels
+     int32 locale = sConfig.GetIntDefault("DBC.Locale", 0 /*LocaleConstant::LOCALE_enUS*/); // bot->GetSession()->GetSessionDbcLocale();
+     // -- In case we're using auto detect on config file
+-    if (locale == 255)
++    // -- Or using non-standard locale
++    if (locale == 255 || locale > 6) {
+         locale = static_cast<int32>(LocaleConstant::LOCALE_enUS);
++    }
+     
+     AreaTableEntry const* current_zone = GetAreaEntryByAreaID(sTerrainMgr.GetAreaId(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()));
+     ChannelMgr* cMgr = channelMgr(bot->GetTeam());
+diff --git a/playerbot/strategy/actions/SuggestWhatToDoAction.cpp b/playerbot/strategy/actions/SuggestWhatToDoAction.cpp
+index bc089c5d..8d324067 100644
+--- a/playerbot/strategy/actions/SuggestWhatToDoAction.cpp
++++ b/playerbot/strategy/actions/SuggestWhatToDoAction.cpp
+@@ -21,9 +21,11 @@ SuggestWhatToDoAction::SuggestWhatToDoAction(PlayerbotAI* ai, std::string name)
+     : Action{ ai, name }
+     , _locale{ sConfig.GetIntDefault("DBC.Locale", 0 /*LocaleConstant::LOCALE_enUS*/) }
+ {
+-    // -- In case we're using auto detect on config file^M
+-    if (_locale == 255)
++    // -- In case we're using auto detect on config file
++    // -- Or using non-standard locale
++    if (_locale == 255 || _locale > 6) {
+         _locale = static_cast<int32>(LocaleConstant::LOCALE_enUS);
++    }
+ 
+     suggestions.push_back(&SuggestWhatToDoAction::instance);
+     suggestions.push_back(&SuggestWhatToDoAction::specificQuest);

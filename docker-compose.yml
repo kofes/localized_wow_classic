@@ -1,0 +1,158 @@
+name: cmangos
+services:
+  base:
+    container_name: base
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MANGOS_TYPE: ${MANGOS_TYPE}
+        MANGOS_DBUSER: ${MANGOS_DBUSER}
+        MANGOS_DBPASS: ${MANGOS_DBPASS}
+        MANGOS_DB_PORT: ${DB_PORT}
+        MANGOS_PATH: ${MANGOS_PATH}
+        CLIENT_DIRECTORY: ${CLIENT_DIRECTORY}
+        DATABASE_HOST: ${MANGOS_DBHOST}
+        DATABASE_USER: ${DB_USER}
+        DATABASE_PASS: ${DB_PASS}
+        DATABASE_PORT: ${DB_PORT}
+
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+
+  database:
+    image: mariadb:11.2
+
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASS}
+    
+    restart: always
+
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+
+    networks:
+      - default
+
+    volumes:
+      - database_data:/var/lib/mysql
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  mangosd:
+    container_name: mangosd
+    depends_on:
+      - base
+
+    build:
+      context: mangosd/
+      dockerfile: Dockerfile
+      args:
+        DATABASE_HOST: ${MANGOS_DBHOST}
+        DATABASE_PORT: ${DB_PORT}
+        DATABASE_PASS: ${DB_PASS}
+        MANGOS_DBUSER: ${MANGOS_DBUSER}
+        MANGOS_DBPASS: ${MANGOS_DBPASS}
+        MANGOS_PATH: ${MANGOS_PATH}
+
+    environment:
+      MANGOS_PATH: ${MANGOS_PATH}
+      STARTUP_CACHE_DIRECTORY: ${STARTUP_CACHE_DIRECTORY}
+      MANGOS_DBUSER: ${MANGOS_DBUSER}
+      MANGOS_DBPASS: ${MANGOS_DBPASS}
+      DATABASE_HOST: ${MANGOS_DBHOST}
+      DATABASE_PORT: ${DB_PORT}
+      DATABASE_PASS: ${DB_PASS}
+
+    entrypoint: ${MANGOS_PATH}/scripts/entrypoint.sh
+
+    stdin_open: true
+    tty: true
+
+    networks:
+      - default
+
+    links:
+      - database:${MANGOS_DBHOST}
+
+    ports:
+      - "8085:8085"
+
+    volumes:
+      - ./mangosd/config:/tmp/configs:ro
+      - ./mangosd/scripts:${MANGOS_PATH}/scripts/:ro
+      - startup_data:${STARTUP_CACHE_DIRECTORY}
+      - resources_data:${MANGOS_PATH}/resources
+      - ${CLIENT_DIRECTORY}:${MANGOS_PATH}/client:ro
+
+  realmd:
+    container_name: realmd
+    image: cmangos-base:latest
+    depends_on:
+      - base
+
+    environment:
+      MANGOS_PATH: ${MANGOS_PATH}
+      STARTUP_CACHE_DIRECTORY: ${STARTUP_CACHE_DIRECTORY}
+      MANGOS_DBUSER: ${MANGOS_DBUSER}
+      MANGOS_DBPASS: ${MANGOS_DBPASS}
+      DATABASE_HOST: ${MANGOS_DBHOST}
+      DATABASE_PORT: ${DB_PORT}
+      DATABASE_PASS: ${DB_PASS}
+
+    entrypoint: ${MANGOS_PATH}/scripts/entrypoint.sh
+
+    networks:
+      - default
+
+    links:
+      - database:${MANGOS_DBHOST}
+
+    ports:
+      - "3724:3724"
+
+    volumes:
+      - ./realmd/config:/tmp/configs:ro
+      - ./realmd/scripts:${MANGOS_PATH}/scripts/:ro
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    depends_on:
+      - database
+
+    env_file:
+      - phpmyadmin/.env
+
+    profiles:
+      - debug
+
+    environment:
+      PMA_HOST: ${MANGOS_DBHOST}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASS}
+
+    networks:
+      - default
+
+    links:
+      - database:${MANGOS_DBHOST}
+
+    ports:
+      - "8080:80"
+
+networks:
+  default:
+
+volumes:
+  database_initialization_scripts:
+  database_data:
+  startup_data:
+  resources_data:
