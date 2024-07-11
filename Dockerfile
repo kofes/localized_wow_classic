@@ -6,19 +6,19 @@ ARG TIMEZONE=Etc/UTC
 ENV TZ=${TIMEZONE}
 
 # Update/upgrade & install required libraries for server compilation/usage
-RUN apt update && apt upgrade
-RUN apt -y install\
-    build-essential\
-    cmake\
-    g++-12\
-    git-core\
-    patch\
-    libboost-all-dev\
-    libmariadb-dev-compat\
-    mariadb-client\
-    libssl-dev\
-    grep\
-    binutils\
+RUN apt update && apt upgrade &&\
+    apt -y install\
+        build-essential\
+        cmake\
+        g++-12\
+        git-core\
+        patch\
+        libboost-all-dev\
+        libmariadb-dev-compat\
+        mariadb-client\
+        libssl-dev\
+        grep\
+        binutils\
 &&\
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 12 --slave /usr/bin/g++ g++ /usr/bin/g++-12
 
@@ -90,23 +90,3 @@ RUN cmake\
 
 ## Build server
 RUN cmake --build . --target install --config Release
-
-
-# Make configuration files from those templates
-WORKDIR ${MANGOS_PATH}/run/etc
-RUN cp anticheat.conf.dist anticheat.conf
-RUN cp aiplayerbot.conf.dist aiplayerbot.conf
-
-# Change configuration files
-ARG DATABASE_HOST
-ARG MANGOS_DB_PORT
-ARG MANGOS_DBUSER
-ARG MANGOS_DBPASS
-
-ENV DATABASE_HOST=${DATABASE_HOST}
-ENV MANGOS_DB_PORT=${MANGOS_DB_PORT}
-ENV MANGOS_DBUSER=${MANGOS_DBUSER}
-ENV MANGOS_DBPASS=${MANGOS_DBPASS}
-
-# FROM scratch
-# COPY --from=build / /
