@@ -3,7 +3,6 @@ FROM cmangos-base as builder
 
 ARG DATABASE_HOST
 ARG DATABASE_PORT
-ARG DATABASE_PASS
 
 ARG MANGOS_DBUSER
 ARG MANGOS_DBPASS
@@ -26,3 +25,22 @@ RUN cp InstallFullDB.config InstallFullDB.config.tmp &&\
     sed -i '/^PLAYERBOTS_DB="*"/c\PLAYERBOTS_DB="YES"' InstallFullDB.config.tmp &&\
     sed -i '/^LOCALIZATION_PATCH="*"/c\LOCALIZATION_PATCH="ClassicDB_ruRU_1_0_2.sql"' InstallFullDB.config.tmp &&\
     mv InstallFullDB.config.tmp InstallFullDB.config
+
+FROM ubuntu:22.04 as runner
+
+# Set environment for silent timezone setup (installation)
+ENV DEBIAN_FRONTEND=noninteractive
+ARG TIMEZONE=Etc/UTC
+ENV TZ=${TIMEZONE}
+
+ARG MANGOS_PATH
+
+# Update/upgrade & install required libraries for server usage
+RUN apt update &&\
+    apt install -y --no-install-recommends\
+        tzdata\
+        libmariadb-dev
+
+COPY --from=builder ${MANGOS_PATH}/mangos ${MANGOS_PATH}/mangos
+COPY --from=builder ${MANGOS_PATH}/run ${MANGOS_PATH}/run
+COPY --from=builder ${MANGOS_PATH}/database ${MANGOS_PATH}/database
