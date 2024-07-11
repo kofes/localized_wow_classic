@@ -265,7 +265,7 @@
 +index ddde74c..92a796e 100644
 +--- a/src/CMakeLists.txt
 ++++ b/src/CMakeLists.txt
-+@@ -24,12 +24,14 @@ endif()
++@@ -24,12 +24,15 @@ endif()
 + # Playerbots module
 + if(BUILD_PLAYERBOTS)
 +   include(FetchContent)
@@ -276,6 +276,7 @@
 +     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/modules/PlayerBots"
 +     GIT_REPOSITORY "https://github.com/cmangos/playerbots.git"
 +     GIT_TAG "master"
+++    GIT_PROGRESS TRUE
 ++    PATCH_COMMAND ${PLAYER_BOTS_PATCH_COMMAND}
 ++    UPDATE_DISCONNECTED 1
 +   )
