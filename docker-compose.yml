@@ -95,9 +95,14 @@ services:
 
   realmd:
     container_name: realmd
-    image: cmangos-base:latest
     depends_on:
       - base
+
+    build:
+      context: realmd/
+      dockerfile: Dockerfile
+      args:
+        MANGOS_PATH: ${MANGOS_PATH}
 
     environment:
       MANGOS_PATH: ${MANGOS_PATH}
