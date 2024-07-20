@@ -1,0 +1,2 @@
+# Make backup each day at 01:00
+0 1 * * * bash /tmp/scripts/make_backup.sh >> /var/log/backup.crontab.log 2>&1

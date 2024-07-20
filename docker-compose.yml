@@ -92,6 +92,7 @@ services:
       - startup_data:${STARTUP_CACHE_DIRECTORY}
       - resources_data:${MANGOS_PATH}/resources
       - ${CLIENT_DIRECTORY}:${MANGOS_PATH}/client:ro
+      - ./backup/archives:/tmp/backup/archives
 
   realmd:
     container_name: realmd
@@ -153,11 +154,39 @@ services:
     ports:
       - "8080:80"
 
+
+  backup:
+    container_name: backup
+    build:
+      context: backup/
+      dockerfile: Dockerfile
+
+    restart: always
+
+    networks:
+      - default
+
+    links:
+      - database:${MANGOS_DBHOST}
+
+    environment:
+      DATABASE_HOST: database
+      DATABASE_PASS: ${DB_PASS}
+
+    volumes:
+      # setup target backup folder on host
+      - ./backup/archives:/tmp/backup/archives
+      # add backup scripts
+      - ./backup/scripts:/tmp/scripts:ro
+      # list of volumes
+      - resources_data:/tmp/backup/resources_data:ro
+      - database_data:/tmp/backup/database_data:ro
+      - startup_data:/tmp/backup/startup_data:ro
+
 networks:
   default:
 
 volumes:
-  database_initialization_scripts:
   database_data:
   startup_data:
   resources_data:

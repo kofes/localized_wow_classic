@@ -2,10 +2,21 @@
 
 set -xe
 
+source $(dirname $0)/restore_data_from_backup.sh
+
 function main() {
+    local latest_backup_path=$(get_latest_backup_directory)
+
     if ! are_client_resources_extracted_by_this_script; then
-        echo "Client resources extraction started..."
-        extract_client_resources
+        # try restore data from backup
+        if [ ! -z $latest_backup_path ]; then
+            echo "Client resources restoration from backup started..."
+            restore_resources_data $latest_backup_path
+        # otherwise start extraction
+        else
+            echo "Client resources extraction started..."
+            extract_client_resources
+        fi
         cache_successful_client_resources_extraction
     fi
     echo "Client resources are extracted"
@@ -13,8 +24,15 @@ function main() {
     while [ ! is_database_accesible ]; do sleep 5s; done
 
     if ! is_database_initialized_by_this_script; then
-        echo "Database initialization..."
-        setup_database
+        # try restore data from backup
+        if [ ! -z $latest_backup_path ]; then
+            echo "Database records restoration from backup started..."
+            restore_databases_data $latest_backup_path
+        # otherwise start extraction
+        else
+            echo "Database initialization..."
+            setup_database
+        fi
         cache_successful_database_initialization
     fi
     echo "Database initialized"
