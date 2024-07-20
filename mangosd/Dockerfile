@@ -39,7 +39,8 @@ ARG MANGOS_PATH
 RUN apt update &&\
     apt install -y --no-install-recommends\
         tzdata\
-        libmariadb-dev
+        libmariadb-dev\
+        mariadb-client
 
 COPY --from=builder ${MANGOS_PATH}/mangos ${MANGOS_PATH}/mangos
 COPY --from=builder ${MANGOS_PATH}/run ${MANGOS_PATH}/run
